@@ -1,0 +1,52 @@
+(defun start()
+	(firstDeal (shuffle))
+)
+
+
+(defun shuffle()
+  (shuffle-deck'((2 spades)(3 spades)(4 spades)(5 spades)(6 spades)(7 spades)(8 spades)(9 spades)(10 spades)(J spades)(Q spades)(K spades)(A spades)(2 clubs)(3 clubs)(4 clubs)(5 clubs)(6 clubs)(7 clubs)(8 clubs)(9 clubs)(10 clubs)(J clubs)(Q clubs)(K clubs)(A clubs)(2 diamonds)(3 diamonds)(4 diamonds)(5 diamonds)(6 diamonds)(7 diamonds)(8 diamonds)(9 diamonds)(10 diamonds)(J diamonds)(Q diamonds)(K diamonds)(A diamonds)(2 hearts)(3 hearts)(4 hearts)(5 hearts)(6 hearts)(7 hearts)(8 hearts)(9 hearts)(10 hearts)(J hearts)(Q hearts)(K hearts)(A hearts))))
+
+
+(defun shuffle-deck(L1)
+  (loop for i from (length L1) downto 2
+        do (rotatef (elt L1 (random i))
+                    (elt L1 (1- i)))) 
+  L1)
+
+
+(defun play-hand(L1 L2)
+  (cond
+   ((= (length L1) 0) "Game over. You have no more cards in your pile; you lose.")
+   ((= (length L2) 0) "Game over. Opponent has no more cards in their pile; you win!")
+   (T (format t "Your card: ~a~%Opponent's card: ~a" (car L1) (car L2))
+     (cond
+      ((< (cardVal (car (car L1))) (cardVal (car (car L2)))) (format t "~%You lost the hand.~%~%") (sleep 1) (play-hand (cdr L1) (append (append (cdr L2) (list (car L2))) (list (car L1)))))
+      ((> (cardVal (car (car L1))) (cardVal (car (car L2)))) (format t "~%You won the hand!~%~%") (sleep 1) (play-hand (append (append (cdr L1) (list (car L1))) (list (car L2))) (cdr L2)))
+      (T (format t "~%This means WAR!!~%~%") (war L1 L2) )))))
+
+
+(defun cardVal (x)
+  (cond
+   ((eql (type-of x) 'FIXNUM) x)
+   (T (cond
+       ((eql x 'J) 11)
+       ((eql x 'Q) 12)
+       ((eql x 'K) 13)
+       ((eql x 'A) 14)))))
+
+
+(defun firstDeal(L1)
+  (play-hand (subseq L1 0 25) (subseq L1 26 52)))
+
+
+(defun war(L1 L2)
+  (cond 
+   ((< (length L1) 4) (format nil "You don't have enough cards to make war. You LOSE."))
+   ((< (length L2) 4) (format nil "Opponent doesn't have enough cards to make war. You WIN!"))
+   (T
+    (format t "Your cards: ~a~%*face-down*~%WAR CARD: ~a~%~%" (car L1) (car (cdr (cdr L1))))
+    (format t "Opponent's cards: ~a~%*face-down*~%WAR CARD: ~a~%~%" (car L2) (car (cdr (cdr L2))))
+    (cond
+     ((< (cardVal (car (car (cdr (cdr L1))))) (cardVal (car (car (cdr (cdr L2)))))) (format t "YOU LOSE THE WAR!!!~%Cards lost:~%~a~%~a~%~a~%" (car L1) (car (cdr L1)) (car (cdr (cdr L1)))) (play-hand (cdr (cdr (cdr L1))) (append (append (append (cdr (cdr (cdr L2))) (list (car L1))) (list (car (cdr L1)))) (list (car (cdr (cdr L1)))))))
+     ((> (cardVal (car (car (cdr (cdr L1))))) (cardVal (car (car (cdr (cdr L2)))))) (format t "YOU WON THE WAR!!!~%Cards won:~%~a~%~a~%~a~%" (car L2) (car (cdr L2)) (car (cdr (cdr L2)))) (play-hand (append (append (append (cdr (cdr (cdr L1))) (list (car L2))) (list (car (cdr L2)))) (list (car (cdr (cdr L2))))) (cdr (cdr (cdr L2)))))
+     ((= (cardVal (car (car (cdr (cdr L1))))) (cardVal (car (car (cdr (cdr L2)))))) (format t "MORE WAR!!!") (war (cdr (cdr (cdr L1))) (cdr (cdr (cdr L2)))))))))
